@@ -10,16 +10,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  QuotationStatusBadge,
   RfqPriorityBadge,
   RfqStatusBadge,
 } from "@/components/features/vb/status-badges";
-import type { Rfq } from "@/lib/vb-types";
+import type { QuotationStatus, Rfq } from "@/lib/vb-types";
 import { format, formatDistanceToNowStrict, isPast } from "date-fns";
-import { ExternalLink, FileText } from "lucide-react";
+import { ExternalLink, FileText, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+type RfqRow = Rfq & {
+  myQuotation?: { status: QuotationStatus } | null;
+};
+
 interface Props {
-  rfqs: Rfq[];
+  rfqs: RfqRow[];
+  /** Vendor mode: action becomes "Build quotation" → quote workspace. */
+  vendor?: boolean;
 }
 
 function deadlineLabel(deadline: string) {
@@ -29,21 +36,26 @@ function deadlineLabel(deadline: string) {
   return `in ${formatDistanceToNowStrict(d)}`;
 }
 
-export function RfqsTable({ rfqs }: Props) {
+export function RfqsTable({ rfqs, vendor = false }: Props) {
   if (rfqs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card py-16 text-center dark:border-[#2a2a2a] dark:bg-panel">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
           <FileText className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="text-sm font-semibold text-foreground">No RFQs yet</h3>
+        <h3 className="text-sm font-semibold text-foreground">
+          {vendor ? "No RFQs assigned to you" : "No RFQs yet"}
+        </h3>
         <p className="max-w-sm text-xs text-muted-foreground">
-          Create a request for quotation to invite vendors to bid. Drafts and
-          active RFQs appear here.
+          {vendor
+            ? "When a buyer assigns you an RFQ, it appears here to reply with a quotation."
+            : "Create a request for quotation to invite vendors to bid. Drafts and active RFQs appear here."}
         </p>
-        <Link href="/rfqs/new">
-          <Button size="sm">Create RFQ</Button>
-        </Link>
+        {!vendor && (
+          <Link href="/rfqs/new">
+            <Button size="sm">Create RFQ</Button>
+          </Link>
+        )}
       </div>
     );
   }
@@ -91,12 +103,32 @@ export function RfqsTable({ rfqs }: Props) {
                 <span>{deadlineLabel(rfq.deadline)}</span>
               </TableCell>
               <TableCell className="text-right">
-                <Link href={`/rfqs/${rfq._id}`}>
-                  <Button size="sm" variant="ghost">
-                    <ExternalLink className="h-4 w-4" />
-                    View
-                  </Button>
-                </Link>
+                {vendor ? (
+                  rfq.myQuotation ? (
+                    <div className="flex items-center justify-end gap-2">
+                      <QuotationStatusBadge status={rfq.myQuotation.status} />
+                      <Link href={`/rfqs/${rfq._id}/quote`}>
+                        <Button size="sm" variant="outline">
+                          Open quote
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link href={`/rfqs/${rfq._id}/quote`}>
+                      <Button size="sm">
+                        <Sparkles className="h-4 w-4" />
+                        Build quotation
+                      </Button>
+                    </Link>
+                  )
+                ) : (
+                  <Link href={`/rfqs/${rfq._id}`}>
+                    <Button size="sm" variant="ghost">
+                      <ExternalLink className="h-4 w-4" />
+                      View
+                    </Button>
+                  </Link>
+                )}
               </TableCell>
             </TableRow>
           ))}

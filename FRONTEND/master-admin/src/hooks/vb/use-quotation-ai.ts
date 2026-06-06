@@ -60,6 +60,8 @@ export function useGenerateAiDraft() {
       toast.error(err.message || "AI draft generation failed"),
     onSuccess: (res) => {
       qc.setQueryData(QUOTATION_KEY(res.quotation._id), res.quotation);
+      qc.invalidateQueries({ queryKey: ["vb", "rfqs"] });
+      qc.invalidateQueries({ queryKey: ["vb", "vendor"] });
       toast.success("AI draft generated — review and edit before submitting");
     },
   });

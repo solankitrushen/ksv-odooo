@@ -58,6 +58,8 @@ export function useCreateQuotation() {
       toast.error(err.message || "Failed to create quotation"),
     onSuccess: (res) => {
       qc.setQueryData(KEY_ONE(res.quotation._id), res.quotation);
+      qc.invalidateQueries({ queryKey: ["vb", "rfqs"] });
+      qc.invalidateQueries({ queryKey: ["vb", "vendor"] });
     },
   });
 }
@@ -94,6 +96,7 @@ function useQuotationAction(
       toast.success(successMsg);
       qc.setQueryData(KEY_ONE(res.quotation._id), res.quotation);
       qc.invalidateQueries({ queryKey: ["vb", "rfqs"] });
+      qc.invalidateQueries({ queryKey: ["vb", "vendor"] });
     },
   });
 }

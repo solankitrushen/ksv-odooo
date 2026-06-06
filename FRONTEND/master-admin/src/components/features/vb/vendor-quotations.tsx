@@ -47,9 +47,10 @@ export function VendorQuotations() {
         </div>
         <h3 className="text-sm font-semibold text-foreground">No quotations yet</h3>
         <p className="max-w-sm text-xs text-muted-foreground">
-          Open an assigned RFQ and submit a quotation. It will appear here so you can track approval.
+          Go to your RFQs and reply to one with a quotation — the AI co-pilot can
+          help you build it. Submitted quotations show up here to track approval.
         </p>
-        <Link href="/rfqs"><Button size="sm">View my RFQs</Button></Link>
+        <Link href="/rfqs"><Button size="sm">Go to my RFQs</Button></Link>
       </div>
     );
   }

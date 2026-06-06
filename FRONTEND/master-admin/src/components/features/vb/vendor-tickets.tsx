@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { MessageSquare, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export function VendorTickets() {
@@ -118,6 +119,18 @@ function TicketDialog({ id, onOpenChange }: { id: string | null; onOpenChange: (
                 <TicketStatusBadge status={ticket.status} />
               </DialogDescription>
             </DialogHeader>
+
+            {ticket.rfqId && (
+              <Link href={`/rfqs/${ticket.rfqId}/quote`}>
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Revise your quotation with AI, then resubmit for approval
+                  </span>
+                  <Button size="sm">Open quote</Button>
+                </div>
+              </Link>
+            )}
 
             <div className="max-h-[40vh] space-y-3 overflow-y-auto rounded-lg border border-border p-3 dark:border-[#2a2a2a]">
               {ticket.messages.length === 0 ? (

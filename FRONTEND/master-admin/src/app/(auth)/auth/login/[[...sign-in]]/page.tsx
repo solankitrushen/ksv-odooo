@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -87,6 +88,15 @@ export default function LoginPage() {
           <Button className="w-full" disabled={loading} type="submit">
             {loading ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
           </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              className="font-medium text-foreground hover:underline"
+              href="/auth/signup"
+            >
+              Create one
+            </Link>
+          </p>
         </form>
       </CardContent>
     </Card>
