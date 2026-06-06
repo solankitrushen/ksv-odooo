@@ -23,8 +23,11 @@ Single repository containing both apps:
   <a href="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mp4">Download the demo</a>.
 </video>
 
-▶️ **[Watch the demo](./assets/demo.mp4)** (also viewable locally in any
-Markdown preview that supports HTML5 video)
+
+
+https://github.com/user-attachments/assets/2519a9a1-14ff-413f-b4ff-61827d8b7fab
+
+
 
 ---
 
