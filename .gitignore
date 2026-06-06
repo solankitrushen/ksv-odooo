@@ -12,6 +12,7 @@
 !/FRONTEND/
 !/README.md
 !/.gitignore
+!/assets/
 
 # ---------------------------------------------------------------------------
 # Rules below also apply INSIDE BACKEND/ and FRONTEND/.

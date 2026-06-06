@@ -1,22 +1,61 @@
 # VendorBridge
 
-A Procurement & Vendor Management ERP — manage vendors, RFQs, quotations, approvals, purchase orders, and invoices, with built-in AI assistance.
+**A Procurement & Vendor Management ERP** — manage vendors, RFQs, quotations, approvals, purchase orders, and invoices, with built‑in AI assistance.
 
-This repo holds both apps:
+Single repository containing both apps:
 
-- `BACKEND/` — Node + Express + MongoDB API
-- `FRONTEND/master-admin/` — Next.js admin dashboard
+| App | Stack | Path | Port |
+|-----|-------|------|------|
+| Backend API | Node · Express · MongoDB | `BACKEND/` | 4469 |
+| Admin / Vendor web app | Next.js · React · Tailwind · shadcn/ui | `FRONTEND/master-admin/` | 3000 |
+
+---
+
+## Demo
+
+<video
+  src="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mov"
+  controls
+  muted
+  playsinline
+  width="100%">
+  Your browser can't play this video inline.
+  <a href="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mov">Download the demo</a>.
+</video>
+
+▶️ **[Watch the demo](./assets/demo.mov)** (also viewable locally in any
+Markdown preview that supports HTML5 video)
+
+---
+
+## Features
+
+- **Vendors** — onboard vendors with instant portal credentials, activate / deactivate, reset access.
+- **RFQs** — create requests for quotation with a guided multi‑step wizard and assign vendors.
+- **Quotations** — vendors reply with quotations built using an **AI co‑pilot**; live AI scoring & suggestions.
+- **Comparison** — side‑by‑side quotation comparison with lowest‑price highlighting.
+- **Approvals** — AI auto‑review (0–100 score + recommendation), approve / reject, or AI‑drafted **bargaining tickets**.
+- **Purchase Orders & Invoices** — auto‑generated on approval, downloadable as PDF, emailed to the vendor.
+- **Reports & Activity** — spend by category, top vendors, monthly trends, full activity log.
+- **AI assistant** — a floating help chatbox plus **⌘K / Ctrl+K** command palette.
+
+## Roles
+
+- **Admin / Officer / Manager (staff)** — full procurement: vendors, RFQs, comparison, approvals, POs, invoices, reports.
+- **Vendor** — sees only their own data: assigned RFQs, submit/track quotations, their POs & invoices, negotiation tickets.
 
 ---
 
 ## Prerequisites
 
 - **Node.js 18+**
-- **MongoDB** — a connection string (local or MongoDB Atlas)
+- **MongoDB** connection string (local or MongoDB Atlas)
 
 ---
 
-## 1. Backend setup
+## Setup
+
+### 1. Backend
 
 ```bash
 cd BACKEND
@@ -24,46 +63,37 @@ npm install
 cp .env.example .env
 ```
 
-Open `.env` and set at least:
+Set at least these in `BACKEND/.env`:
 
 ```
 MONGODB_URI=<your mongodb connection string>
 JWT_SECRET=<any long random string, 32+ chars>
 ```
 
-Start it:
+Run it:
 
 ```bash
-npm run dev
+npm run dev      # http://localhost:4469
 ```
 
-API runs at **http://localhost:4469**.
+> Email (invoice / credential emails) is optional — it only sends when the
+> `SMTP_*` values are set. Everything else works without it.
 
-> Email sending (invoice/credential emails) is optional — it only works if you also set the `SMTP_*` values in `.env`. Everything else works without it.
-
----
-
-## 2. Seed test data
-
-With the backend `.env` configured, load demo vendors, RFQs, and quotations:
+### 2. Seed demo data
 
 ```bash
 cd BACKEND
-npm run seed:vb
+npm run seed:vb   # tenant, staff, vendors, RFQs, sample quotations — safe to re-run
 ```
 
-This is safe to re-run anytime.
-
----
-
-## 3. Frontend setup
+### 3. Frontend
 
 ```bash
 cd FRONTEND/master-admin
 npm install
 ```
 
-Create `.env.local`:
+Create `FRONTEND/master-admin/.env.local`:
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4469/api/v1
@@ -72,17 +102,15 @@ NEXT_PUBLIC_LOGIN_PATH=/vb/auth/login
 NEXT_PUBLIC_LOGOUT_PATH=/vb/auth/logout
 NEXT_PUBLIC_ME_PATH=/vb/auth/me
 
-# IMPORTANT: must be the SAME value as JWT_SECRET in BACKEND/.env
-AUTH_FLAG_SECRET=<same long random string you used for JWT_SECRET>
+# IMPORTANT: must EXACTLY match JWT_SECRET in BACKEND/.env
+AUTH_FLAG_SECRET=<same value as BACKEND JWT_SECRET>
 ```
 
-Start it:
+Run it:
 
 ```bash
-npm run dev
+npm run dev      # http://localhost:3000
 ```
-
-App runs at **http://localhost:3000**.
 
 ---
 
@@ -96,17 +124,31 @@ Tenant: **vendorbridge**
 | Vendor (Acme) | `vendor.acme@vendorbridge.test` | `Vendor@1234` |
 | Vendor (BrightTech) | `vendor.brighttech@vendorbridge.test` | `Vendor@1234` |
 
-Log in at **http://localhost:3000** with the admin account to manage everything.
-For the vendor view, log in with a vendor account in a **separate / incognito**
-window (one browser holds one session at a time).
+Sign in at **http://localhost:3000**. For the vendor view, use a vendor account
+in a **separate / incognito** window (one browser holds one session at a time).
+You can also create a brand‑new organization from the **Sign up** screen.
 
 ---
 
-## Quick test flow
+## End‑to‑end flow
 
-1. **Admin** logs in → Dashboard.
-2. **Vendors** → add a vendor (you get a portal link + temporary password to share).
-3. **RFQs** → create an RFQ and assign vendors.
-4. **Vendor** logs in (incognito) → opens their assigned RFQ → submits a quotation (AI co-pilot can help).
-5. **Admin** → RFQ → **AI auto-review** → **Approve** (auto-creates the Purchase Order + Invoice) → download / email the invoice.
-6. Explore **Quotations comparison**, **Reports**, **Activity**, and the **AI assistant** (bottom-right) or press **⌘K / Ctrl+K** to search.
+1. **Admin** adds a vendor → gets a portal link + temporary password to share.
+2. **Admin** creates an RFQ (multi‑step wizard) and assigns vendors.
+3. **Vendor** (incognito) → **RFQs** → **Build quotation** → AI co‑pilot builds it → submit.
+4. **Admin** → RFQ → **AI auto‑review** → **Approve** → Purchase Order + Invoice auto‑generated (and emailed).
+5. Or **Admin** raises a **bargaining ticket** → **Vendor** opens it → *Revise with AI* → resubmit → approved → invoice generated.
+6. Explore **Quotations comparison**, **Reports**, **Activity**, the **AI assistant** (bottom‑right), and **⌘K** search.
+
+---
+
+## Production build
+
+Stop the dev server before building (they share the `.next` folder):
+
+```bash
+# backend
+cd BACKEND && npm start
+
+# frontend
+cd FRONTEND/master-admin && npm run build && npm start
+```
