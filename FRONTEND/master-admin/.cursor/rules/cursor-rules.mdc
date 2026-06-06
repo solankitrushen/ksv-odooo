@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules Location (Dashboard)
+
+How to add and organize Cursor rules for this project.
+
+1. **Always place rule files** in `PROJECT_ROOT/.cursor/rules/`:
+
+   ```
+   dashboard/
+   ├── .cursor/
+   │   └── rules/
+   │       ├── core-development.mdc
+   │       ├── cursor-rules.mdc
+   │       ├── nextjs.mdc
+   │       ├── creation-rules.mdc
+   │       └── structure.mdc
+   └── src/
+       └── ...
+   ```
+
+2. **Naming convention**:
+   - Use **kebab-case** for filenames.
+   - Always use **.mdc** extension.
+   - Use names that describe the rule's purpose.
+
+3. **Rule file structure**:
+
+   ```md
+   ---
+   description: Short description of the rule's purpose
+   globs: optional/path/pattern/**/*
+   alwaysApply: false
+   ---
+   # Rule Title
+   Main content in markdown...
+   ```
+
+4. **Do not place rule files**:
+   - In the project root (only under `.cursor/rules/`).
+   - In subdirectories outside `.cursor/rules/`.
+
+5. Use **alwaysApply: true** only for rules that must apply to every conversation (e.g. core-development, cursor-rules). Use **globs** or **alwaysApply: false** for feature-specific rules.

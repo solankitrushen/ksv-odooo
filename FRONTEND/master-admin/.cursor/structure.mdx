@@ -1,0 +1,360 @@
+# Project OSMO Client — Structure & Click Flows
+
+> Full structure, routing, and click-flow reference for the React/Vite frontend. Use this when migrating to Next.js or onboarding.
+
+---
+
+## 1. Project Overview
+
+**Project OSMO** is a marketing SaaS admin frontend: social, SEO, ads, and outreach tools under one app. The client is a **React 18+ SPA** with Vite, React Router v7, Tailwind v4, Shadcn/UI, and React Query.
+
+---
+
+## 2. Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | React 19 + JSX |
+| Build | Vite 7 |
+| Routing | React Router v7 |
+| Styling | Tailwind CSS v4 |
+| HTTP | Axios (withCredentials for cookies) |
+| UI | Shadcn/UI (Radix), Lucide icons |
+| State | React Query + Context API |
+| Rich text | Tiptap |
+| Charts | Recharts |
+| Real-time | socket.io-client |
+
+---
+
+## 3. Folder Structure
+
+```
+client/
+├── public/                    # Static assets (favicon, etc.)
+├── src/
+│   ├── main.jsx               # Entry: ReactDOM.createRoot → AppProviders → App
+│   ├── App.jsx                # Suspense + Outlet (no layout here)
+│   ├── index.css              # Global Tailwind
+│   │
+│   ├── constants/             # App-wide constants
+│   │   ├── events.constants.js
+│   │   ├── onboarding.constants.js
+│   │   ├── sidebar.constants.js   # Sidebar navigation tree
+│   │   └── social.constants.js
+│   │
+│   ├── lib/
+│   │   └── utils.js           # cn(), etc.
+│   │
+│   ├── services/              # Business logic & state
+│   │   ├── api/               # Axios client, interceptors, *.api.js
+│   │   ├── auth/utils/        # cookies.js
+│   │   ├── context/            # *Context.jsx (Auth, Router, Toast, etc.)
+│   │   ├── hooks/             # useAuth, useLogin, useSeoBlogs, etc.
+│   │   ├── providers/         # Compose + descriptors + *Provider.jsx
+│   │   ├── query/             # React Query client
+│   │   ├── helpers/
+│   │   └── websocket/
+│   │
+│   └── ui/                    # Presentation
+│       ├── components/        # Shadcn primitives + shared (NavLink, ErrorNotice)
+│       ├── containers/
+│       │   ├── layout/        # AppLayout, Sidebar, TopBar, SidebarItem
+│       │   ├── onboarding/    # Onboarding steps
+│       │   └── osmo/          # PageHeader, StatCard, DataTable, RichEditor, etc.
+│       ├── guards/            # RequireAuth, RequireGuest
+│       ├── hooks/              # useToast, useTooltip (UI-specific)
+│       └── pages/             # All route targets (see Routes table)
+│
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+└── shadcn.json
+```
+
+---
+
+## 4. Provider Tree (Dependency Order)
+
+Providers are composed via `descriptors.jsx` and `compose.js` (topological sort). **Order must not change** in `main.jsx`.
+
+```
+QueryProvider (React Query)
+  └─ ToastProvider (deps: query)
+      └─ TooltipProvider (deps: toast)
+          └─ AuthProvider (deps: tooltip)
+              └─ RouterProvider (deps: auth)
+                  └─ <App /> → <Suspense><Outlet /></Suspense>
+```
+
+- **SidebarProvider** is not in the root tree; it wraps layout inside `AppLayout` when a page uses `<AppLayout>`.
+
+---
+
+## 5. Route Table (Path → Page → Guard)
+
+| Path | Page component | Guard | Notes |
+|------|----------------|-------|--------|
+| `/` | — | — | **Redirect** to `/dashboard` |
+| `/auth/login` | Login | RequireGuest | |
+| `/auth/signup` | Signup | RequireGuest | |
+| `/auth/forgot` | Forgot | RequireGuest | |
+| `/auth/2fa` | TwoFactor | RequireGuest | |
+| `/onboarding` | Onboarding | RequireAuth (requireOnboarding: false) | New users |
+| `/onboarding/setup` | PostOnboardingSetup | RequireAuth | After onboarding |
+| `/dashboard` | Dashboard | RequireAuth | Main app home |
+| `/notifications` | Notifications | RequireAuth | |
+| `/workspaces` | Workspaces | RequireAuth | |
+| `/activity` | Activity | RequireAuth | |
+| `/on-your-desk` | OnYourDesk | RequireAuth | |
+| `/social/generator` | SocialGenerator | RequireAuth | |
+| `/social/editor/:id` | SocialEditor | RequireAuth | |
+| `/social/calendar` | SocialCalendar | RequireAuth | |
+| `/social/scheduler` | SocialScheduler | RequireAuth | |
+| `/social/integrations` | SocialIntegrations | RequireAuth | |
+| `/social/assets` | SocialAssets | RequireAuth | |
+| `/social/analytics` | SocialAnalytics | RequireAuth | |
+| `/social/composer` | SocialComposer | RequireAuth | |
+| `/social/events` | SocialEvents | RequireAuth | |
+| `/social/events/create` | SocialCreateEvent | RequireAuth | |
+| `/social/events/:eventId` | SocialEvents | RequireAuth | |
+| `/social/events/:eventId/edit` | SocialCreateEvent | RequireAuth | |
+| `/seo/generator` | SEOGenerator | RequireAuth | |
+| `/seo/editor/:id` | SEOEditor | RequireAuth | |
+| `/seo/preview/:id` | SEOPreview | RequireAuth | |
+| `/seo/scanner` | SEOScanner | RequireAuth | |
+| `/seo/backlinks` | SEOBacklinks | RequireAuth | |
+| `/seo/backlink-builder` | BacklinkBuilder | RequireAuth | |
+| `/seo/backlink-opportunities` | SEOBacklinkOpportunities | RequireAuth | |
+| `/seo/keywords` | SEOKeywords | RequireAuth | |
+| `/seo/competitors` | SEOCompetitors | RequireAuth | |
+| `/seo/reports` | SEOReports | RequireAuth | |
+| `/seo/reports/:reportId` | SEOReportDetail | RequireAuth | |
+| `/seo/market-updates` | SEOMarketUpdates | RequireAuth | |
+| `/seo/blogs` | SEOBlogs | RequireAuth | |
+| `/ads/create` | AdsCreate | RequireAuth | |
+| `/ads/creative` | AdsCreative | RequireAuth | |
+| `/ads/dashboard` | AdsDashboard | RequireAuth | |
+| `/ads/abtest` | AdsABTest | RequireAuth | |
+| `/ads/integrations` | AdsIntegrations | RequireAuth | |
+| `/outreach/import` | OutreachImport | RequireAuth | |
+| `/outreach/leads` | OutreachLeads | RequireAuth | |
+| `/outreach/sequences` | OutreachSequences | RequireAuth | |
+| `/outreach/composer` | OutreachComposer | RequireAuth | |
+| `/outreach/analytics` | OutreachAnalytics | RequireAuth | |
+| `/outreach/email/integrations` | OutreachIntegrations | RequireAuth | |
+| `/outreach/templates` | OutreachTemplates | RequireAuth | |
+| `/outreach/campaigns` | OutreachCampaigns | RequireAuth | |
+| `/outreach/business-card` | OutreachBusinessCard | RequireAuth | |
+| `/business-card/:shareableId` | BusinessCardViewer | **None** | Public shareable card |
+| `/admin/users` | AdminUsers | RequireAuth | |
+| `/admin/billing` | AdminBilling | RequireAuth | |
+| `/admin/logs` | AdminLogs | RequireAuth | |
+| `/settings/account` | SettingsAccount | RequireAuth | |
+| `/settings/workspace` | SettingsWorkspace | RequireAuth | |
+| `/settings/integrations` | SettingsIntegrations | RequireAuth | |
+| `/settings/business-dna` | SettingsBusinessDNA | RequireAuth | |
+| `*` | NotFound | — | 404 |
+
+---
+
+## 6. Guards Behavior
+
+- **RequireGuest**: If authenticated → redirect to `/dashboard`. Used on `/auth/*`.
+- **RequireAuth**:
+  - Not authenticated → redirect to `/auth/login` (state: `{ from: location }`).
+  - Authenticated but `!user.isOnboarded` and `requireOnboarding !== false` → redirect to `/onboarding`.
+  - **Exception**: `/onboarding` uses `requireOnboarding={false}` so users can complete onboarding.
+
+---
+
+## 7. Click Flows (Where Clicks Go)
+
+### 7.1 Entry points
+
+| Entry | Target |
+|-------|--------|
+| Open `/` | Redirect → `/dashboard` |
+| Open `/auth/login` | Login page (if guest) |
+| Open `/auth/signup` | Signup page (if guest) |
+| Open any protected path while logged out | RequireAuth → `/auth/login` |
+| Open any `/auth/*` while logged in | RequireGuest → `/dashboard` |
+
+### 7.2 Auth flow (sequential)
+
+```
+Landing (/) → redirect /dashboard
+  → if not authenticated: RequireAuth → /auth/login
+
+/auth/login
+  ├─ "Sign in" (submit) → login() → navigate("/dashboard")
+  └─ "Sign up" link → /auth/signup
+
+/auth/signup
+  ├─ "Create account" (submit) → signup() → navigate("/auth/login")
+  └─ "Sign in" link → /auth/login
+
+/auth/forgot
+  ├─ After submit (sent) → "Back to login" → /auth/login
+  └─ (no other links in snippet)
+
+/auth/2fa
+  └─ (on success would go to /dashboard; implementation may vary)
+```
+
+### 7.3 Onboarding flow
+
+```
+User authenticated but !isOnboarded → RequireAuth → /onboarding
+
+/onboarding
+  ├─ Complete onboarding → navigate("/dashboard") or navigate("/onboarding/setup", { state: { website } })
+  └─ support link → mailto:support@osmo.ai
+
+/onboarding/setup
+  └─ Finish → navigate("/settings/integrations", { replace: true })
+```
+
+### 7.4 Global layout (Sidebar + TopBar)
+
+**Sidebar** (`sidebar.constants.js` → `Sidebar` → `SidebarItem`):
+
+| Label | href |
+|-------|------|
+| Logo "OSMO" | `/` (then redirect to `/dashboard`) |
+| Dashboard | `/dashboard` |
+| On Your Desk | `/on-your-desk` |
+| **Social** (expandable) | |
+| → Calendar | `/social/calendar` |
+| → Scheduler | `/social/scheduler` |
+| → Assets | `/social/assets` |
+| → Events | `/social/events` |
+| → Analytics | `/social/analytics` |
+| → Integrations | `/social/integrations` |
+| **SEO** (expandable) | |
+| → Generator | `/seo/generator` |
+| → Scanner | `/seo/scanner` |
+| → Backlinks | `/seo/backlinks` |
+| → Backlink Builder | `/seo/backlink-builder` |
+| → Backlink Opportunities | `/seo/backlink-opportunities` |
+| → Keywords | `/seo/keywords` |
+| → Competitors | `/seo/competitors` |
+| → Reports | `/seo/reports` |
+| → Market Updates | `/seo/market-updates` |
+| → Blogs | `/seo/blogs` |
+| **Ads** (expandable) | |
+| → Create | `/ads/create` |
+| → Creative | `/ads/creative` |
+| → Dashboard | `/ads/dashboard` |
+| → A/B Test | `/ads/abtest` |
+| → Integrations | `/ads/integrations` |
+| **Outreach** (expandable) | |
+| → Import | `/outreach/import` |
+| → Leads | `/outreach/leads` |
+| → Sequences | `/outreach/sequences` |
+| → Composer | `/outreach/composer` |
+| → Campaigns | `/outreach/campaigns` |
+| → Templates | `/outreach/templates` |
+| → Business Card | `/outreach/business-card` |
+| → Analytics | `/outreach/analytics` |
+| → Email Integrations | `/outreach/email/integrations` |
+| **Admin** (expandable) | |
+| → Users | `/admin/users` |
+| → Billing | `/admin/billing` |
+| → Logs | `/admin/logs` |
+| **Settings** (expandable) | |
+| → Account | `/settings/account` |
+| → Workspace | `/settings/workspace` |
+| → Integrations | `/settings/integrations` |
+| → Business DNA | `/settings/business-dna` |
+
+**TopBar**:
+
+| Element | Target |
+|---------|--------|
+| Notifications (bell) | `/notifications` |
+| Avatar | `/settings/account` |
+| Search | Input only (no route) |
+
+### 7.5 In-page links (by feature)
+
+**404**
+
+- "Go home" → `/` (then redirect to `/dashboard`).
+
+**Social**
+
+- **Events**: "Create event" → `/social/events/create`; event row → `/social/events/:eventId`; edit → `/social/events/:eventId/edit`; back → `/social/events`.
+- **CreateEvent**: After create → `/social/events/:eventId`; back → `navigate(-1)`.
+- **Analytics**: "Connect Platforms" → `/social/integrations`; "Create Post" → `/social/composer`.
+
+**SEO**
+
+- **Generator**: After generate → `/seo/editor/:id`.
+- **Blogs**: Row click → `/seo/editor/:id`; "New blog" → `/seo/generator`.
+- **Keywords**: Actions → `/seo/generator?…` (query params).
+- **Preview**: Back → `navigate(-1)`; "Edit" → `/seo/editor/:id`; "Blogs" → `/seo/blogs`.
+
+**Outreach**
+
+- **Composer**: "Email Integrations" → `/outreach/email/integrations`.
+- **Campaigns**: "Email Integrations" → `/outreach/email/integrations`; "Templates" → `/outreach/templates`; "Import" → `/outreach/import`.
+- **BusinessCard**: Shareable link → external `href` (same app: `/business-card/:shareableId`).
+
+**Settings**
+
+- **Integrations**: Social CTA → `/social/integrations`; Outreach CTA → `/outreach/email/integrations`.
+
+**On Your Desk**
+
+- Item click → `viewPath` (e.g. `navigate(viewPath)`); social event → `/social/events/:id`; SEO blog → `/seo/blogs/:id` (or editor as per implementation). Some items use `item.data.context.targetUrl` as external `href`.
+
+**PostOnboardingSetup**
+
+- OAuth / external links use `href={url}` (no in-app route).
+
+---
+
+## 8. Page → Layout & Outgoing Links (Summary)
+
+| Page | Wraps with AppLayout? | Notable outgoing links |
+|------|----------------------|-------------------------|
+| Login, Signup, Forgot, TwoFactor | No | Sign up / Login / Back to login |
+| Onboarding, PostOnboardingSetup | No (or minimal) | Dashboard, onboarding/setup, settings/integrations, mailto |
+| Dashboard, Notifications, Workspaces, Activity, OnYourDesk | Yes | — (sidebar/topbar only) |
+| Social/* | Yes | Events ↔ create/edit/view; Analytics → integrations, composer |
+| SEO/* | Yes | Generator → editor; Blogs ↔ editor, generator; Keywords → generator; Preview → editor, blogs |
+| Ads/* | Yes | — (sidebar) |
+| Outreach/* | Yes | Composer/Campaigns → email/integrations, templates, import; Business card share link |
+| Admin/* | Yes | — |
+| Settings/* | Yes | Integrations → social/integrations, outreach/email/integrations |
+| NotFound | No | Link to `/` |
+| BusinessCardViewer | No | Public page |
+
+---
+
+## 9. API Layer (for migration)
+
+- **Base**: `services/api/client.js` — Axios instance, `withCredentials: true`, base URL from env (`VITE_BACKEND_*_PORT`).
+- **Interceptors**: Attach `Authorization: Bearer <cookie>`; on 401 redirect to `/auth/login`.
+- **Modules**: `auth.api.js`, `seo.api.js`, `social.api.js`, `events.api.js`, `on-your-desk.api.js`, `campaign.api.js`, `outreach.api.js`, etc. All under `services/api/`.
+
+---
+
+## 10. Contexts & Hooks (key for state)
+
+- **Auth**: `AuthContext` / `AuthProvider` → `useAuth()` (user, isAuthenticated, isLoading, login, logout, refreshUser).
+- **Router**: `RouterContext` / `RouterProvider` → `useRouter()` (push, navigate, router).
+- **Sidebar**: `SidebarContext` / `SidebarProvider` (in AppLayout) → `useSidebar()` (expandedSection, toggleExpanded).
+- **Toast**: `ToastProvider` → `useToast()`.
+- **Query**: React Query `QueryClient` / `QueryProvider` → `useQuery`, `useMutation` in hooks.
+
+---
+
+## 11. Index page (dev directory)
+
+`ui/pages/Index.jsx` is a **directory of all pages** (sections: Auth, Core, Social, SEO, Ads, Outreach, Admin, Settings). It is **not** mounted at `/` in production; the router redirects `/` → `/dashboard`. If you need a true landing or dev sitemap in Next.js, you can recreate this page and route separately.
+
+---
+
+*Last updated from client RouterProvider, sidebar.constants, and page components. Use for Next.js migration and onboarding.*
