@@ -10,7 +10,8 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SIDEBAR_NAV, isNavSection } from "@/constants/nav.constants";
+import { isNavSection, navForRoles } from "@/constants/nav.constants";
+import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
 type PaletteItem = {
@@ -21,24 +22,32 @@ type PaletteItem = {
   icon: LucideIcon;
   /** keywords boost matching beyond the visible label */
   keywords?: string;
+  /** when true, only staff see this item */
+  staffOnly?: boolean;
 };
 
 /**
- * Navigation targets are derived from SIDEBAR_NAV so the palette stays in sync
- * with the sidebar. Tickets lives outside SIDEBAR_NAV today, so it is appended
- * explicitly alongside the quick actions.
+ * Navigation targets are derived from SIDEBAR_NAV (role-filtered) so the palette
+ * stays in sync with the sidebar. Tickets + quick actions are staff-only.
  */
-function buildItems(): PaletteItem[] {
-  const navItems: PaletteItem[] = SIDEBAR_NAV.filter(
-    (item): item is Extract<typeof item, { href: string }> => !isNavSection(item)
-  ).map((item) => ({
-    id: `nav:${item.href}`,
-    label: `Go to ${item.label}`,
-    hint: "Navigation",
-    href: item.href,
-    icon: item.icon,
-    keywords: item.label,
-  }));
+function buildItems(roles: Parameters<typeof navForRoles>[0]): PaletteItem[] {
+  const navItems: PaletteItem[] = navForRoles(roles)
+    .filter(
+      (item): item is Extract<typeof item, { href: string }> => !isNavSection(item)
+    )
+    .map((item) => ({
+      id: `nav:${item.href}`,
+      label: `Go to ${item.label}`,
+      hint: "Navigation",
+      href: item.href,
+      icon: item.icon,
+      keywords: item.label,
+    }));
+
+  const isStaff = roles.some(
+    (r) => r === "admin" || r === "officer" || r === "manager"
+  );
+  if (!isStaff) return navItems;
 
   const extraNav: PaletteItem[] = [
     {
@@ -75,13 +84,14 @@ function buildItems(): PaletteItem[] {
 
 export function CommandPalette() {
   const router = useRouter();
+  const { roles } = useAuth();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [activeIndex, setActiveIndex] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const allItems = React.useMemo(() => buildItems(), []);
+  const allItems = React.useMemo(() => buildItems(roles), [roles]);
 
   const results = React.useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import {
   SIDEBAR_NAV,
+  navForRoles,
   isNavSection,
   type SidebarNavItem,
 } from "@/constants/nav.constants";
@@ -46,7 +47,8 @@ export function LeftSidebar({
   settingsOpen: boolean;
 }) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
+  const navItems = useMemo(() => navForRoles(roles), [roles]);
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -130,7 +132,7 @@ export function LeftSidebar({
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-3">
         <nav className="flex flex-col gap-0.5">
-          {SIDEBAR_NAV.map((item: SidebarNavItem) => {
+          {navItems.map((item: SidebarNavItem) => {
             if (isNavSection(item)) {
               const isExp = expandedSection === item.label;
               const hasActive = item.children.some(

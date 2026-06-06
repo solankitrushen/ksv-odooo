@@ -25,6 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePageTitle } from "@/contexts/page-title-context";
+import { useAuth } from "@/contexts/auth-context";
+import { VendorDashboard } from "@/components/features/vb/vendor-dashboard";
 import { useVbDashboard } from "@/hooks/vb/use-vb-analytics";
 import { formatPaise } from "@/lib/money";
 import { format } from "date-fns";
@@ -44,16 +46,23 @@ import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const { setPageTitle } = usePageTitle();
-  const { data, error, isError, isLoading, refetch } = useVbDashboard();
+  const { isVendor } = useAuth();
+  const { data, error, isError, isLoading, refetch } = useVbDashboard(!isVendor);
   const [vendorOpen, setVendorOpen] = useState(false);
 
   useEffect(() => {
     setPageTitle({
-      description: "Procurement overview — vendors, RFQs, and quoted value",
+      description: isVendor
+        ? "Your RFQs, quotations, and orders"
+        : "Procurement overview — vendors, RFQs, and quoted value",
       title: "Dashboard",
     });
     return () => setPageTitle(null);
-  }, [setPageTitle]);
+  }, [setPageTitle, isVendor]);
+
+  if (isVendor) {
+    return <VendorDashboard />;
+  }
 
   if (isError) {
     return (

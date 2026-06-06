@@ -73,3 +73,4 @@ Thumbs.db
 *.swo
 .idea/
 .vscode/
+.cursor/

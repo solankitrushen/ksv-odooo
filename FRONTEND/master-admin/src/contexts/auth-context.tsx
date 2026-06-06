@@ -23,12 +23,23 @@ export type User = {
   role: "admin" | "store" | "user";
 };
 
+export type VbRole = "admin" | "officer" | "manager" | "vendor";
+
+type MeResponse = {
+  user?: User;
+  roles?: VbRole[];
+  activeTenantId?: string;
+};
+
 type AuthValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => Promise<void>;
   refresh: () => void;
   user: User | null;
+  roles: VbRole[];
+  isVendor: boolean;
+  isStaff: boolean;
 };
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -41,10 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const qc = useQueryClient();
   const router = useRouter();
 
-  const { data: user, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryFn: async () => {
       try {
-        return await apiFetch<{ user: User } | User>(ME_PATH);
+        return await apiFetch<MeResponse | User>(ME_PATH);
       } catch (e) {
         if (e instanceof ApiError && e.status === 401) return null;
         throw e;
@@ -58,10 +69,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const normalizedUser = useMemo<User | null>(() => {
-    if (!user) return null;
-    const u = (user as { user?: User }).user ?? (user as User);
+    if (!data) return null;
+    const u = (data as MeResponse).user ?? (data as User);
     return u && u.email ? u : null;
-  }, [user]);
+  }, [data]);
+
+  const roles = useMemo<VbRole[]>(() => {
+    const r = (data as MeResponse | null)?.roles;
+    return Array.isArray(r) ? r : [];
+  }, [data]);
 
   const logout = useCallback(async () => {
     try {
@@ -72,12 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace("/auth/login");
   }, [qc, router]);
 
+  const isVendor = roles.includes("vendor") && !roles.some((r) => r !== "vendor");
+  const isStaff = roles.some((r) => r === "admin" || r === "officer" || r === "manager");
+
   const value: AuthValue = {
     isAuthenticated: Boolean(normalizedUser),
     isLoading,
     logout,
     refresh: () => refetch(),
     user: normalizedUser,
+    roles,
+    isVendor,
+    isStaff,
   };
 
   return (

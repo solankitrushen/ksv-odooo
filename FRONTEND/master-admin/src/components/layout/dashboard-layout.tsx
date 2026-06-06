@@ -18,7 +18,7 @@ import { usePageTitle } from "@/contexts/page-title-context";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout, user, isStaff } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const { pageTitle } = usePageTitle();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -88,7 +88,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             >
               <Search className="h-4 w-4" />
             </Button>
-            <NotificationsBell />
+            {isStaff && <NotificationsBell />}
             <span className="text-sm text-muted-foreground truncate max-w-[160px]">
               {(user as { email?: string })?.email}
             </span>
@@ -134,7 +134,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
       <CommandPalette />
-      <AiAssistant />
+      {isStaff && <AiAssistant />}
     </div>
   );
 }
