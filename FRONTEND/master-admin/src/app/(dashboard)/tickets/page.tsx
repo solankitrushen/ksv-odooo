@@ -1,5 +1,14 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
+import { VendorTickets } from "@/components/features/vb/vendor-tickets";
+
+export default function TicketsPage() {
+  const { isVendor } = useAuth();
+  return isVendor ? <VendorTickets /> : <StaffTicketsPage />;
+}
+
+
 import { TicketStatusBadge } from "@/components/features/vb/status-badges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +46,7 @@ import { format } from "date-fns";
 import { AlertTriangle, MessageSquare, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function TicketsPage() {
+function StaffTicketsPage() {
   const [filter, setFilter] = useState<TicketStatusFilter>("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const { setPageTitle } = usePageTitle();

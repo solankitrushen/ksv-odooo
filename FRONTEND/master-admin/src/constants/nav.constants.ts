@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Receipt,
   ShoppingCart,
+  Ticket,
 } from "lucide-react";
 
 export const HEADER_ROUTES: { href: string; icon: LucideIcon; label: string }[] =
@@ -47,12 +48,16 @@ export const SIDEBAR_NAV: SidebarNavItem[] = [
   { href: "/vendors", icon: Building2, label: "Vendors", roles: ["admin", "officer"] },
   // RFQs page shows assigned RFQs to vendors, all RFQs to staff.
   { href: "/rfqs", icon: FileText, label: "RFQs" },
-  { href: "/quotations", icon: GitCompare, label: "Quotations", roles: STAFF },
+  // Quotations: staff see comparison; vendors see their own quotations.
+  { href: "/quotations", icon: GitCompare, label: "Quotations" },
   { href: "/approvals", icon: CheckSquare, label: "Approvals", roles: ["admin", "manager"] },
-  { href: "/purchase-orders", icon: ShoppingCart, label: "Purchase orders", roles: STAFF },
-  { href: "/invoices", icon: Receipt, label: "Invoices", roles: STAFF },
+  // Vendors view their own POs/invoices; staff view all.
+  { href: "/purchase-orders", icon: ShoppingCart, label: "Purchase orders" },
+  { href: "/invoices", icon: Receipt, label: "Invoices" },
   { href: "/reports", icon: BarChart3, label: "Reports", roles: STAFF },
   { href: "/activity", icon: Activity, label: "Activity", roles: STAFF },
+  // Tickets: staff manage; vendors see/reply to their negotiation tickets.
+  { href: "/tickets", icon: Ticket, label: "Tickets" },
 ];
 
 /** Filter nav items to those the given roles may see. */

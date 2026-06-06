@@ -1,5 +1,14 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
+import { VendorQuotations } from "@/components/features/vb/vendor-quotations";
+
+export default function QuotationsPage() {
+  const { isVendor } = useAuth();
+  return isVendor ? <VendorQuotations /> : <StaffQuotationsPage />;
+}
+
+
 import { QuotationCompareMatrix } from "@/components/features/vb/quotation-compare-matrix";
 import { RfqStatusBadge } from "@/components/features/vb/status-badges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -17,7 +26,7 @@ import { AlertTriangle, ArrowLeft, FileSpreadsheet } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
-export default function QuotationsPage() {
+function StaffQuotationsPage() {
   return (
     <Suspense
       fallback={

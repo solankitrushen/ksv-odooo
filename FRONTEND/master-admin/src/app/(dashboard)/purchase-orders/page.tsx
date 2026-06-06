@@ -1,5 +1,14 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
+import { VendorPurchaseOrders } from "@/components/features/vb/vendor-purchase-orders";
+
+export default function PurchaseOrdersPage() {
+  const { isVendor } = useAuth();
+  return isVendor ? <VendorPurchaseOrders /> : <StaffPurchaseOrdersPage />;
+}
+
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,7 +69,7 @@ function fmtDate(value?: string) {
   return format(d, "MMM d, yyyy");
 }
 
-export default function PurchaseOrdersPage() {
+function StaffPurchaseOrdersPage() {
   const [filter, setFilter] = useState<StatusFilter>("all");
   const { setPageTitle } = usePageTitle();
   const { data, error, isError, isLoading, refetch } = usePurchaseOrders();

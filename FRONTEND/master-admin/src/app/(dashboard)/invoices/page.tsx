@@ -1,5 +1,14 @@
 "use client";
 
+import { useAuth } from "@/contexts/auth-context";
+import { VendorInvoices } from "@/components/features/vb/vendor-invoices";
+
+export default function InvoicesPage() {
+  const { isVendor } = useAuth();
+  return isVendor ? <VendorInvoices /> : <StaffInvoicesPage />;
+}
+
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,7 +140,7 @@ async function printInvoice(id: string) {
   }
 }
 
-export default function InvoicesPage() {
+function StaffInvoicesPage() {
   const { setPageTitle } = usePageTitle();
   const { data, error, isError, isLoading, refetch } = useInvoices();
   const download = useDownloadInvoiceById();
