@@ -14,16 +14,16 @@ Single repository containing both apps:
 ## Demo
 
 <video
-  src="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mov"
+  src="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mp4"
   controls
   muted
   playsinline
   width="100%">
   Your browser can't play this video inline.
-  <a href="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mov">Download the demo</a>.
+  <a href="https://github.com/solankitrushen/ksv-odooo/raw/main/assets/demo.mp4">Download the demo</a>.
 </video>
 
-▶️ **[Watch the demo](./assets/demo.mov)** (also viewable locally in any
+▶️ **[Watch the demo](./assets/demo.mp4)** (also viewable locally in any
 Markdown preview that supports HTML5 video)
 
 ---
